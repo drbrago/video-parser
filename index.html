@@ -317,9 +317,17 @@
           const title = block[0].replace(/^Videominiatyr:\s*/, "").trim();
           const timestamp = block[1] || "";
           let dateLine = null;
-          if (block.length >= 3 + tailFields) {
+          const liveIndex = block.indexOf("Streamingmjukvara");
+          if (liveIndex !== -1 && block[liveIndex + 3]) {
+            dateLine = block[liveIndex + 3];
+          } else if (block.length >= 3 + tailFields) {
             const tailStart = block.length - tailFields;
             dateLine = block[tailStart + 3] || null;
+          } else {
+            const fallback = [...block]
+              .reverse()
+              .find((line) => /\b(19|20)\d{2}\b/.test(line));
+            dateLine = fallback || null;
           }
           const yearMatch = dateLine
             ? dateLine.match(/\b(19|20)\d{2}\b/)
