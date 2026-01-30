@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Live Text Parser</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Space+Grotesk:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f7f2e8;
+        --ink: #1d1b16;
+        --muted: #5b534a;
+        --accent: #e4572e;
+        --accent-2: #2b6f6a;
+        --card: #fff7ec;
+        --shadow: rgba(29, 27, 22, 0.18);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Space Grotesk", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(1200px 700px at 10% -10%, rgba(228, 87, 46, 0.2), transparent 60%),
+          radial-gradient(900px 600px at 95% 10%, rgba(43, 111, 106, 0.18), transparent 60%),
+          var(--bg);
+        min-height: 100vh;
+      }
+
+      header {
+        padding: 56px 20px 24px;
+        text-align: center;
+        animation: fade-in 600ms ease-out;
+      }
+
+      h1 {
+        font-family: "Fraunces", serif;
+        font-size: clamp(2.4rem, 5vw, 3.6rem);
+        margin: 0 0 12px;
+        letter-spacing: -0.02em;
+      }
+
+      header p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 1.05rem;
+      }
+
+      .wrap {
+        max-width: 1100px;
+        margin: 0 auto 80px;
+        padding: 0 20px;
+        display: grid;
+        gap: 24px;
+      }
+
+      .panel {
+        background: var(--card);
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 20px 45px -30px var(--shadow);
+        border: 1px solid rgba(29, 27, 22, 0.08);
+        animation: float-in 700ms ease-out;
+      }
+
+      .panel h2 {
+        margin: 0 0 12px;
+        font-size: 1.3rem;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 280px;
+        resize: vertical;
+        padding: 16px;
+        font-size: 0.98rem;
+        border-radius: 14px;
+        border: 1px solid rgba(29, 27, 22, 0.15);
+        background: #fff;
+        font-family: "Space Grotesk", sans-serif;
+      }
+
+      .controls {
+        margin-top: 16px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+      }
+
+      label {
+        font-size: 0.95rem;
+        color: var(--muted);
+      }
+
+      input[type="text"] {
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(29, 27, 22, 0.15);
+        font-size: 0.95rem;
+        width: 120px;
+      }
+
+      button {
+        border: none;
+        background: var(--accent);
+        color: #fff;
+        padding: 12px 18px;
+        font-size: 0.98rem;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: transform 150ms ease, box-shadow 150ms ease;
+        box-shadow: 0 10px 20px -12px rgba(228, 87, 46, 0.7);
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 22px -12px rgba(228, 87, 46, 0.85);
+      }
+
+      button.secondary {
+        background: var(--accent-2);
+        box-shadow: 0 10px 20px -12px rgba(43, 111, 106, 0.7);
+      }
+
+      .results {
+        display: grid;
+        gap: 16px;
+      }
+
+      .summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        align-items: center;
+        font-size: 1rem;
+        color: var(--muted);
+      }
+
+      .summary strong {
+        color: var(--ink);
+        font-size: 1.1rem;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 10px;
+      }
+
+      li {
+        background: #fff;
+        border-radius: 14px;
+        padding: 12px 14px;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        border: 1px solid rgba(29, 27, 22, 0.1);
+      }
+
+      .title {
+        font-weight: 600;
+      }
+
+      .stamp {
+        color: var(--accent-2);
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .empty {
+        color: var(--muted);
+        font-style: italic;
+      }
+
+      @media (min-width: 900px) {
+        .wrap {
+          grid-template-columns: 1.1fr 0.9fr;
+          align-items: start;
+        }
+      }
+
+      @keyframes fade-in {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes float-in {
+        from {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Live Text Parser</h1>
+      <p>Paste your live.txt content, filter by year, and get total duration.</p>
+    </header>
+
+    <main class="wrap">
+      <section class="panel">
+        <h2>Input</h2>
+        <textarea id="input" placeholder="Paste the live.txt content here..."></textarea>
+        <div class="controls">
+          <label for="year">Year filter (optional)</label>
+          <input id="year" type="text" inputmode="numeric" placeholder="2025" />
+          <button id="parse">Parse</button>
+          <button id="clear" class="secondary">Clear</button>
+        </div>
+      </section>
+
+      <section class="panel results">
+        <h2>Results</h2>
+        <div class="summary">
+          <div>Total items: <strong id="count">0</strong></div>
+          <div>Total duration: <strong id="total">0:00</strong></div>
+        </div>
+        <ul id="list"></ul>
+        <div id="empty" class="empty">No results yet.</div>
+      </section>
+    </main>
+
+    <script>
+      const input = document.getElementById('input');
+      const yearInput = document.getElementById('year');
+      const parseBtn = document.getElementById('parse');
+      const clearBtn = document.getElementById('clear');
+      const list = document.getElementById('list');
+      const count = document.getElementById('count');
+      const total = document.getElementById('total');
+      const empty = document.getElementById('empty');
+
+      function parseDurationToSeconds(value) {
+        if (!value) return null;
+        if (!/^\d+:\d{2}(:\d{2})?$/.test(value)) return null;
+        const parts = value.split(':').map((p) => Number(p));
+        if (parts.some((p) => Number.isNaN(p))) return null;
+        if (parts.length === 2) return parts[0] * 60 + parts[1];
+        if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+        return null;
+      }
+
+      function formatDuration(totalSeconds) {
+        const h = Math.floor(totalSeconds / 3600);
+        const m = Math.floor((totalSeconds % 3600) / 60);
+        const s = totalSeconds % 60;
+        if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        return `${m}:${String(s).padStart(2, '0')}`;
+      }
+
+      function extractBlocks(lines) {
+        const blocks = [];
+        let current = null;
+        for (const line of lines) {
+          if (line.startsWith('Videominiatyr:')) {
+            if (current) blocks.push(current);
+            current = [line];
+          } else if (current) {
+            current.push(line);
+          }
+        }
+        if (current) blocks.push(current);
+        return blocks;
+      }
+
+      function parseText(text, yearFilter) {
+        const lines = text
+          .split(/\r?\n/)
+          .map((line) => line.trim())
+          .filter((line) => line.length > 0);
+        const blocks = extractBlocks(lines);
+        const items = [];
+
+        for (const block of blocks) {
+          if (block.length < 2) continue;
+          const title = block[0].replace(/^Videominiatyr:\s*/, '').trim();
+          const timestamp = block[1] || '';
+          const yearMatch = block.join(' ').match(/\b(19|20)\d{2}\b/);
+          const year = yearMatch ? yearMatch[0] : null;
+
+          if (yearFilter && year !== yearFilter) continue;
+
+          items.push({
+            title: title || '(untitled)',
+            timestamp,
+            year,
+          });
+        }
+        return items;
+      }
+
+      function render() {
+        const yearFilter = yearInput.value.trim();
+        const items = parseText(input.value, yearFilter || null);
+
+        list.innerHTML = '';
+        let totalSeconds = 0;
+        let displayCount = 0;
+
+        for (const item of items) {
+          const ts = item.timestamp || '';
+          if (/^kommande$/i.test(ts)) continue;
+          const seconds = parseDurationToSeconds(ts);
+          if (seconds == null) continue;
+          totalSeconds += seconds;
+          displayCount += 1;
+
+          const li = document.createElement('li');
+          const titleEl = document.createElement('div');
+          titleEl.className = 'title';
+          titleEl.textContent = item.title;
+          const stampEl = document.createElement('div');
+          stampEl.className = 'stamp';
+          stampEl.textContent = ts;
+          li.appendChild(titleEl);
+          li.appendChild(stampEl);
+          list.appendChild(li);
+        }
+
+        count.textContent = displayCount;
+        total.textContent = formatDuration(totalSeconds);
+        empty.style.display = displayCount === 0 ? 'block' : 'none';
+      }
+
+      parseBtn.addEventListener('click', render);
+      clearBtn.addEventListener('click', () => {
+        input.value = '';
+        yearInput.value = '';
+        list.innerHTML = '';
+        count.textContent = '0';
+        total.textContent = '0:00';
+        empty.style.display = 'block';
+      });
+    </script>
+  </body>
+</html>
