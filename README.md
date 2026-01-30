@@ -5,13 +5,11 @@ This is a single‑file webpage that parses the text exported from YouTube Studi
 ## Files
 
 - `index.html` — the webpage (paste input, filter, get results)
-- `live.txt` — example input data
-- `live.json` — parsed JSON output (optional)
 
 ## How to use locally
 
 1) Open `index.html` in a browser.
-2) Paste the contents of `live.txt` into the textarea.
+2) Paste the contents of video data into the textarea.
 3) (Optional) enter a year filter like `2025`.
 4) Click **Parse**.
 
