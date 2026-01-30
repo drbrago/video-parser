@@ -30,8 +30,16 @@
         font-family: "Space Grotesk", sans-serif;
         color: var(--ink);
         background:
-          radial-gradient(1200px 700px at 10% -10%, rgba(228, 87, 46, 0.2), transparent 60%),
-          radial-gradient(900px 600px at 95% 10%, rgba(43, 111, 106, 0.18), transparent 60%),
+          radial-gradient(
+            1200px 700px at 10% -10%,
+            rgba(228, 87, 46, 0.2),
+            transparent 60%
+          ),
+          radial-gradient(
+            900px 600px at 95% 10%,
+            rgba(43, 111, 106, 0.18),
+            transparent 60%
+          ),
           var(--bg);
         min-height: 100vh;
       }
@@ -118,7 +126,9 @@
         font-size: 0.98rem;
         border-radius: 999px;
         cursor: pointer;
-        transition: transform 150ms ease, box-shadow 150ms ease;
+        transition:
+          transform 150ms ease,
+          box-shadow 150ms ease;
         box-shadow: 0 10px 20px -12px rgba(228, 87, 46, 0.7);
       }
 
@@ -217,16 +227,21 @@
   <body>
     <header>
       <h1>Live Text Parser</h1>
-      <p>Paste your live.txt content, filter by year, and get total duration.</p>
+      <p>
+        Paste your live.txt content, filter by year, and get total duration.
+      </p>
     </header>
 
     <main class="wrap">
       <section class="panel">
         <h2>Input</h2>
-        <textarea id="input" placeholder="Paste the live.txt content here..."></textarea>
+        <textarea
+          id="input"
+          placeholder="Paste the live.txt content here..."
+        ></textarea>
         <div class="controls">
           <label for="year">Year filter (optional)</label>
-          <input id="year" type="text" inputmode="numeric" placeholder="2025" />
+          <input id="year" type="text" inputmode="numeric" placeholder="Year" />
           <button id="parse">Parse</button>
           <button id="clear" class="secondary">Clear</button>
         </div>
@@ -244,22 +259,23 @@
     </main>
 
     <script>
-      const input = document.getElementById('input');
-      const yearInput = document.getElementById('year');
-      const parseBtn = document.getElementById('parse');
-      const clearBtn = document.getElementById('clear');
-      const list = document.getElementById('list');
-      const count = document.getElementById('count');
-      const total = document.getElementById('total');
-      const empty = document.getElementById('empty');
+      const input = document.getElementById("input");
+      const yearInput = document.getElementById("year");
+      const parseBtn = document.getElementById("parse");
+      const clearBtn = document.getElementById("clear");
+      const list = document.getElementById("list");
+      const count = document.getElementById("count");
+      const total = document.getElementById("total");
+      const empty = document.getElementById("empty");
 
       function parseDurationToSeconds(value) {
         if (!value) return null;
         if (!/^\d+:\d{2}(:\d{2})?$/.test(value)) return null;
-        const parts = value.split(':').map((p) => Number(p));
+        const parts = value.split(":").map((p) => Number(p));
         if (parts.some((p) => Number.isNaN(p))) return null;
         if (parts.length === 2) return parts[0] * 60 + parts[1];
-        if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+        if (parts.length === 3)
+          return parts[0] * 3600 + parts[1] * 60 + parts[2];
         return null;
       }
 
@@ -267,15 +283,16 @@
         const h = Math.floor(totalSeconds / 3600);
         const m = Math.floor((totalSeconds % 3600) / 60);
         const s = totalSeconds % 60;
-        if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-        return `${m}:${String(s).padStart(2, '0')}`;
+        if (h > 0)
+          return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+        return `${m}:${String(s).padStart(2, "0")}`;
       }
 
       function extractBlocks(lines) {
         const blocks = [];
         let current = null;
         for (const line of lines) {
-          if (line.startsWith('Videominiatyr:')) {
+          if (line.startsWith("Videominiatyr:")) {
             if (current) blocks.push(current);
             current = [line];
           } else if (current) {
@@ -293,18 +310,26 @@
           .filter((line) => line.length > 0);
         const blocks = extractBlocks(lines);
         const items = [];
+        const tailFields = 10;
 
         for (const block of blocks) {
           if (block.length < 2) continue;
-          const title = block[0].replace(/^Videominiatyr:\s*/, '').trim();
-          const timestamp = block[1] || '';
-          const yearMatch = block.join(' ').match(/\b(19|20)\d{2}\b/);
+          const title = block[0].replace(/^Videominiatyr:\s*/, "").trim();
+          const timestamp = block[1] || "";
+          let dateLine = null;
+          if (block.length >= 3 + tailFields) {
+            const tailStart = block.length - tailFields;
+            dateLine = block[tailStart + 3] || null;
+          }
+          const yearMatch = dateLine
+            ? dateLine.match(/\b(19|20)\d{2}\b/)
+            : null;
           const year = yearMatch ? yearMatch[0] : null;
 
           if (yearFilter && year !== yearFilter) continue;
 
           items.push({
-            title: title || '(untitled)',
+            title: title || "(untitled)",
             timestamp,
             year,
           });
@@ -316,24 +341,24 @@
         const yearFilter = yearInput.value.trim();
         const items = parseText(input.value, yearFilter || null);
 
-        list.innerHTML = '';
+        list.innerHTML = "";
         let totalSeconds = 0;
         let displayCount = 0;
 
         for (const item of items) {
-          const ts = item.timestamp || '';
+          const ts = item.timestamp || "";
           if (/^kommande$/i.test(ts)) continue;
           const seconds = parseDurationToSeconds(ts);
           if (seconds == null) continue;
           totalSeconds += seconds;
           displayCount += 1;
 
-          const li = document.createElement('li');
-          const titleEl = document.createElement('div');
-          titleEl.className = 'title';
+          const li = document.createElement("li");
+          const titleEl = document.createElement("div");
+          titleEl.className = "title";
           titleEl.textContent = item.title;
-          const stampEl = document.createElement('div');
-          stampEl.className = 'stamp';
+          const stampEl = document.createElement("div");
+          stampEl.className = "stamp";
           stampEl.textContent = ts;
           li.appendChild(titleEl);
           li.appendChild(stampEl);
@@ -342,17 +367,17 @@
 
         count.textContent = displayCount;
         total.textContent = formatDuration(totalSeconds);
-        empty.style.display = displayCount === 0 ? 'block' : 'none';
+        empty.style.display = displayCount === 0 ? "block" : "none";
       }
 
-      parseBtn.addEventListener('click', render);
-      clearBtn.addEventListener('click', () => {
-        input.value = '';
-        yearInput.value = '';
-        list.innerHTML = '';
-        count.textContent = '0';
-        total.textContent = '0:00';
-        empty.style.display = 'block';
+      parseBtn.addEventListener("click", render);
+      clearBtn.addEventListener("click", () => {
+        input.value = "";
+        yearInput.value = "";
+        list.innerHTML = "";
+        count.textContent = "0";
+        total.textContent = "0:00";
+        empty.style.display = "block";
       });
     </script>
   </body>
